@@ -71,11 +71,11 @@
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:layout_gravity="end"
-            android:src="@drawable/ic_avatar_placeholder"
+            android:src="@drawable/profile"
             android:scaleType="centerCrop"
             android:contentDescription="profile"
             android:layout_marginStart="8dp"
-            android:background="@drawable/circle_bg"/>
+            android:background="@drawable/profile"/>
     </androidx.appcompat.widget.Toolbar>
 
     <!-- Main content scroll -->
@@ -126,7 +126,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/bg_statistics"
+                        android:src="@drawable/stats"
                         android:contentDescription="statistics background"/>
 
                     <View
@@ -166,7 +166,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/bg_applications"
+                        android:src="@drawable/apps"
                         android:contentDescription="apps background"/>
                     <View
                         android:layout_width="match_parent"
@@ -204,7 +204,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/bg_bedtime"
+                        android:src="@drawable/bedtime"
                         android:contentDescription="bedtime background"/>
                     <View
                         android:layout_width="match_parent"
