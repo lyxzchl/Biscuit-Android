@@ -1,0 +1,15 @@
+<!-- res/drawable/logout_bg.xml -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- This is the top border -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#E0E0E0" />
+        </shape>
+    </item>
+    <!-- This is the main background, positioned 1dp from the top -->
+    <item android:top="1dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/white" />
+        </shape>
+    </item>
+</layer-list>

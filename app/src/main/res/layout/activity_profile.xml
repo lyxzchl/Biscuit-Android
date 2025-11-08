@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    tools:context=".ProfileActivity">
+
+    <!-- The same decorative circles from MainActivity for a consistent look -->
+    <ImageView
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/background_circle"
+        android:tint="@color/light_pink_circle"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="-40dp"
+        android:layout_marginStart="-30dp"
+        android:contentDescription="@null" />
+
+    <ImageView
+        android:layout_width="220dp"
+        android:layout_height="220dp"
+        android:src="@drawable/background_circle"
+        android:tint="@color/light_lavender_circle"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="-90dp"
+        android:contentDescription="@null" />
+
+    <!-- A simple "Back" button -->
+    <ImageButton
+        android:id="@+id/btnBack"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_arrow_back"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Back"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"/>
+
+    <!-- Profile Image -->
+    <ImageView
+        android:id="@+id/imgProfile"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/ic_avatar_placeholder"
+        android:scaleType="centerCrop"
+        android:background="@drawable/circle_bg"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.2" />
+
+    <!-- Profile Name -->
+    <TextView
+        android:id="@+id/tvProfileName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Robin Demonchild"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        app:layout_constraintTop_toBottomOf="@id/imgProfile"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
+
+    <!-- Email Field -->
+    <TextView
+        android:id="@+id/labelEmail"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Email address:"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@id/inputEmail"
+        app:layout_constraintTop_toBottomOf="@id/tvProfileName"
+        android:layout_marginTop="32dp" />
+
+    <EditText
+        android:id="@+id/inputEmail"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="robin.hood@strawhat.crew"
+        android:inputType="textEmailAddress"
+        android:background="@drawable/edit_text_bg"
+        android:padding="12dp"
+        android:drawableEnd="@drawable/ic_target"
+        android:drawablePadding="8dp"
+        android:enabled="false"
+        app:layout_constraintTop_toBottomOf="@id/labelEmail"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginTop="8dp" />
+
+    <!-- Password Field -->
+    <TextView
+        android:id="@+id/labelPassword"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Password:"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@id/inputPassword"
+        app:layout_constraintTop_toBottomOf="@id/inputEmail"
+        android:layout_marginTop="16dp" />
+
+    <EditText
+        android:id="@+id/inputPassword"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="****************"
+        android:inputType="textPassword"
+        android:background="@drawable/edit_text_bg"
+        android:padding="12dp"
+        android:enabled="false"
+        app:layout_constraintTop_toBottomOf="@id/labelPassword"
+        app:layout_constraintStart_toStartOf="@id/inputEmail"
+        app:layout_constraintEnd_toEndOf="@id/inputEmail"
+        android:layout_marginTop="8dp" />
+
+    <!-- Edit Profile Button -->
+    <TextView
+        android:id="@+id/btnEditProfile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Edit Profile"
+        android:drawableStart="@drawable/ic_person"
+        android:drawablePadding="8dp"
+        android:gravity="center"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/inputPassword"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="32dp"/>
+
+    <!-- Logout Button -->
+    <TextView
+        android:id="@+id/btnLogout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Logout"
+        android:textColor="#FF6347"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:padding="16dp"
+        android:drawableStart="@drawable/ic_logout"
+        android:drawablePadding="8dp"
+        android:background="@drawable/logout_bg"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Bottom Navigation Bar -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="0dp"
+        android:layout_height="64dp"
+        app:menu="@menu/bottom_nav_menu"
+        app:itemIconTint="@color/bottom_nav_tint"
+        app:itemTextColor="@color/bottom_nav_tint"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

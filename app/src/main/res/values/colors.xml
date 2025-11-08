@@ -1,0 +1,8 @@
+<resources>
+    <color name="white">#FFFFFF</color>
+    <color name="primary">#2A3D66</color>
+    <color name="accent">#4FC3F7</color>
+    <color name="bottom_nav_tint">#FF333333</color>
+    <color name="light_pink_circle">#33FFC0CB</color> <!-- Pink with ~20% alpha -->
+    <color name="light_lavender_circle">#4DCCCCFF</color> <!-- Lavender with ~30% alpha -->
+</resources>
