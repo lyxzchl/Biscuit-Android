@@ -56,9 +56,9 @@ public class SplashActivity extends AppCompatActivity {
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
             public void onClick(@NonNull View widget) {
-                // TODO: Replace with your actual RegisterActivity
-                // Intent intent = new Intent(SplashActivity.this, RegisterActivity.class);
-                // startActivity(intent);
+                // TODO: Replace with your actual SignupActivity
+                Intent intent = new Intent(SplashActivity.this, SignupActivity.class);
+                startActivity(intent);
                 Toast.makeText(SplashActivity.this, "Register link clicked!", Toast.LENGTH_SHORT).show();
             }
         };

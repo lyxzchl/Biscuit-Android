@@ -3,5 +3,6 @@
         <!-- ... other strings ... -->
     <string name="splash_register_prompt">You don\'t have an account ? register</string>
     <string name="forgot_password_prompt">Forgot your password ? restore</string>
+    <string name="resend_prompt">Didn\'t receive the email ? resend</string>
 
 </resources>
