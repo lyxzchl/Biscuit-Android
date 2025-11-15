@@ -29,9 +29,9 @@ public class SplashActivity extends AppCompatActivity {
 
         loginButton.setOnClickListener(v -> {
             // TODO: Replace with your actual LoginActivity
-            // Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
-            // startActivity(intent);
-            Toast.makeText(this, "Log In Clicked", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
+            startActivity(intent);
+            Toast.makeText(this, "Logged-In", Toast.LENGTH_SHORT).show();
         });
 
         scheduleButton.setOnClickListener(v -> {

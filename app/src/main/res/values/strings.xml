@@ -2,5 +2,6 @@
     <string name="app_name">Biscuit</string>
         <!-- ... other strings ... -->
     <string name="splash_register_prompt">You don\'t have an account ? register</string>
+    <string name="forgot_password_prompt">Forgot your password ? restore</string>
 
 </resources>
