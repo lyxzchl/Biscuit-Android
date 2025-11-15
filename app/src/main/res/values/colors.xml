@@ -5,4 +5,10 @@
     <color name="bottom_nav_tint">#FF333333</color>
     <color name="light_pink_circle">#33FFC0CB</color> <!-- Pink with ~20% alpha -->
     <color name="light_lavender_circle">#4DCCCCFF</color> <!-- Lavender with ~30% alpha -->
+    <color name="splash_background">#FFFFFF</color>
+    <color name="splash_title_text">#1E1E1E</color>
+    <color name="splash_subtitle_text">#6C6C6C</color>
+    <color name="splash_login_button">#8C9EFF</color> <!-- Lavender/Blue -->
+    <color name="splash_schedule_button">#FFCDD2</color> <!-- Light Pink -->
+    <color name="splash_register_link">#8C9EFF</color>
 </resources>

@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Biscuit</string>
+        <!-- ... other strings ... -->
+    <string name="splash_register_prompt">You don\'t have an account ? register</string>
+
 </resources>
