@@ -39,9 +39,8 @@ public class MainActivity extends AppCompatActivity {
         cardStatistics.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Open Statistics", Toast.LENGTH_SHORT).show();
-                // Intent i = new Intent(MainActivity.this, StatisticsActivity.class);
-                // startActivity(i);
+                Intent i = new Intent(MainActivity.this, StatisticsActivity.class);
+                startActivity(i);
             }
         });
 
@@ -90,12 +89,11 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 } else if (itemId == R.id.nav_profile) {
                     Intent i = new Intent(MainActivity.this, ProfileActivity.class);
-                    // Intent i = new Intent(MainActivity.this, ProfileActivity.class);
                     startActivity(i);
                     return true;
                 }
                 return false;
             }
-        });// Bottom navigation listener
+        });
     }
 }
