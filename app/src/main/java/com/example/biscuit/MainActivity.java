@@ -48,8 +48,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Toast.makeText(MainActivity.this, "Open Applications", Toast.LENGTH_SHORT).show();
-                // Intent i = new Intent(MainActivity.this, ApplicationsActivity.class);
-                // startActivity(i);
+                Intent i = new Intent(MainActivity.this, ApplicationActivity.class);
+                startActivity(i);
             }
         });
 
@@ -57,8 +57,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Toast.makeText(MainActivity.this, "Open Bedtime mode", Toast.LENGTH_SHORT).show();
-                // Intent i = new Intent(MainActivity.this, BedtimeActivity.class);
-                // startActivity(i);
+                Intent i = new Intent(MainActivity.this, BedtimeActivity.class);
+                startActivity(i);
             }
         });
 

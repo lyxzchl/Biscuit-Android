@@ -5,8 +5,11 @@ import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -24,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.example.biscuit.database.DatabaseHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 
@@ -44,10 +48,10 @@ public class StatisticsActivity extends AppCompatActivity {
     private BottomNavigationView bottomNav;
     private MaterialButton btnDevice1, btnDevice2, btnDevice3;
     private TextView tvScreenTime;
-    private TextView tvPercentageChange;
     private LinearLayout layoutAppsList;
     private LinearLayout layoutChartBars;
     private LinearLayout layoutChartDates;
+    private DatabaseHelper databaseHelper;
 
     // Filters
     private TextView btnFilterDaily, btnFilterWeekly, btnFilterMonthly;
@@ -58,6 +62,8 @@ public class StatisticsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_statistics);
 
+        databaseHelper = new DatabaseHelper(this);
+        
         btnMenu = findViewById(R.id.btnMenu);
         imgProfile = findViewById(R.id.imgProfile);
         bottomNav = findViewById(R.id.bottom_navigation);
@@ -65,7 +71,6 @@ public class StatisticsActivity extends AppCompatActivity {
         btnDevice2 = findViewById(R.id.btnDevice2);
         btnDevice3 = findViewById(R.id.btnDevice3);
         tvScreenTime = findViewById(R.id.tvScreenTime);
-        tvPercentageChange = findViewById(R.id.tvPercentageChange);
         layoutAppsList = findViewById(R.id.layoutAppsList);
         layoutChartBars = findViewById(R.id.layoutChartBars);
         layoutChartDates = findViewById(R.id.layoutChartDates);
@@ -73,6 +78,9 @@ public class StatisticsActivity extends AppCompatActivity {
         btnFilterDaily = findViewById(R.id.btnFilterDaily);
         btnFilterWeekly = findViewById(R.id.btnFilterWeekly);
         btnFilterMonthly = findViewById(R.id.btnFilterMonthly);
+        
+        // Load user names from DB to populate buttons
+        loadUserDevices();
 
         btnMenu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,7 +100,15 @@ public class StatisticsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 MaterialButton btn = (MaterialButton) v;
+                // Reset all buttons to unselected style
+                resetDeviceButtons();
+                // Set selected style
+                btn.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#6C5CE7")));
+                btn.setTextColor(Color.WHITE);
+                
                 Toast.makeText(StatisticsActivity.this, "Selected: " + btn.getText(), Toast.LENGTH_SHORT).show();
+                // In a real app, you would reload stats for this specific user/device here
+                loadStatistics();
             }
         };
 
@@ -139,6 +155,69 @@ public class StatisticsActivity extends AppCompatActivity {
         });
         
         updateFilterUI();
+    }
+
+    private void loadUserDevices() {
+        // Hide buttons initially
+        btnDevice1.setVisibility(View.GONE);
+        btnDevice2.setVisibility(View.GONE);
+        btnDevice3.setVisibility(View.GONE);
+        
+        SQLiteDatabase db = databaseHelper.getReadableDatabase();
+        // Fetch top 3 users
+        Cursor cursor = db.rawQuery("SELECT email FROM _user LIMIT 3", null);
+        
+        MaterialButton[] buttons = {btnDevice1, btnDevice2, btnDevice3};
+        int index = 0;
+        
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                if (index >= buttons.length) break;
+                
+                String email = cursor.getString(0);
+                String name = "User";
+                if (email.contains("@")) {
+                    name = email.substring(0, email.indexOf("@"));
+                    // Capitalize first letter
+                    if (name.length() > 0) {
+                        name = name.substring(0, 1).toUpperCase() + name.substring(1);
+                    }
+                } else {
+                    name = email;
+                }
+                
+                buttons[index].setText(name + "'s Device");
+                buttons[index].setVisibility(View.VISIBLE);
+                index++;
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
+        
+        // If no users found, show at least current user or generic
+        if (index == 0) {
+             btnDevice1.setText("My Device");
+             btnDevice1.setVisibility(View.VISIBLE);
+        }
+        
+        // Select first available button by default
+        if (btnDevice1.getVisibility() == View.VISIBLE) {
+            btnDevice1.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#6C5CE7")));
+            btnDevice1.setTextColor(Color.WHITE);
+        }
+    }
+
+    private void resetDeviceButtons() {
+        int unselectedColor = Color.parseColor("#E0E0E0");
+        int black = Color.BLACK;
+        
+        btnDevice1.setBackgroundTintList(android.content.res.ColorStateList.valueOf(unselectedColor));
+        btnDevice1.setTextColor(black);
+        
+        btnDevice2.setBackgroundTintList(android.content.res.ColorStateList.valueOf(unselectedColor));
+        btnDevice2.setTextColor(black);
+        
+        btnDevice3.setBackgroundTintList(android.content.res.ColorStateList.valueOf(unselectedColor));
+        btnDevice3.setTextColor(black);
     }
 
     private void updateFilterUI() {
@@ -234,11 +313,7 @@ public class StatisticsActivity extends AppCompatActivity {
             periodLabel = "last month";
         }
 
-        // Update Main Screen Time Text
-        // Logic: If Daily, show Total. If Weekly/Monthly, show Average Daily? 
-        // The UI says "Average Screen Time". 
-        // Usually Weekly/Monthly stats show the daily average. 
-        // Let's stick to Average for Weekly/Monthly, and Total for Daily.
+
         
         long displayTime = currentPeriodTotal;
         if (currentFilter == 1) displayTime /= 7;
@@ -251,40 +326,14 @@ public class StatisticsActivity extends AppCompatActivity {
         timeString += minutes + " Mins";
         tvScreenTime.setText(timeString);
 
-        // Calculate Percentage Change
-        // We compare Average to Average, or Total to Total. Result is same.
-        // Avoid division by zero
-        if (previousPeriodTotal == 0) previousPeriodTotal = 1; 
-        
-        float change = ((float)(currentPeriodTotal - previousPeriodTotal) / previousPeriodTotal) * 100;
-        String changeStr = "";
-        if (change > 0) {
-            changeStr = String.format(Locale.US, "+%.0f%% increase over %s", change, periodLabel);
-            tvPercentageChange.setTextColor(Color.RED); // Usually red for increase in screen time? Or maybe neutral.
-            // Image showed grey. Let's stick to grey or maybe Red for bad (increase) Green for good (decrease)?
-            // Image had grey text: "increase over last month"
-             tvPercentageChange.setTextColor(Color.parseColor("#888888"));
-        } else {
-            changeStr = String.format(Locale.US, "%.0f%% decrease over %s", Math.abs(change), periodLabel);
-            tvPercentageChange.setTextColor(Color.parseColor("#888888"));
-        }
-        tvPercentageChange.setText(changeStr);
 
 
-        // Update Most Used Apps (Always for Today for simplicity, or match filter?)
-        // User probably expects "Most Used Apps" to match the filter.
-        // Let's update it to match the filter.
         List<UsageStats> statsList = usm.queryUsageStats(
                 currentFilter == 0 ? UsageStatsManager.INTERVAL_DAILY : 
                 (currentFilter == 1 ? UsageStatsManager.INTERVAL_WEEKLY : UsageStatsManager.INTERVAL_MONTHLY), 
                 startTime, endTime);
         
-        // The list returned by queryUsageStats with interval might contain multiple entries or buckets.
-        // We need to aggregate manually for custom ranges anyway.
-        // Ideally we use queryAndAggregateUsageStats but that is API 28+. Assuming minSdk is high enough or fallback.
-        // Let's stick to manual aggregation from queryUsageStats(INTERVAL_DAILY) over the range.
-        // Actually queryUsageStats with a range just returns buckets that fit.
-        // For simplest "Top Apps", let's just query with INTERVAL_DAILY covering the whole range and sum up.
+
         
         List<UsageStats> detailedStats = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
         Map<String, UsageStats> aggregatedStats = new TreeMap<>();
@@ -304,27 +353,7 @@ public class StatisticsActivity extends AppCompatActivity {
         updateMostUsedApps(aggregatedStats);
 
 
-        // Update Chart
-        // If Daily: Hourly breakdown? (Too complex for now, maybe just show "Today" single bar or last 7 days ending today?)
-        // If Weekly: Show last 7 days (Daily breakdown).
-        // If Monthly: Show last 30 days? (Too many bars). Or 4 weeks?
-        
-        // Simplification: 
-        // Daily -> Show Hourly bars (Last 24h) ?? Or just keep the 7-day chart but highlight today?
-        // Let's make the chart context-aware if possible.
-        // If Weekly -> Show 7 days.
-        // If Monthly -> Show 4 weeks (Weekly breakdown).
-        // If Daily -> Show 24 hours?
-        
-        // For this iteration, let's keep the Chart as "Last 7 Days" strictly, or "Weekly Trend".
-        // Changing chart type is heavy. Let's just refresh the "Weekly" chart for now when Weekly is selected.
-        // If Monthly is selected, maybe show last 4 weeks?
-        // If Daily is selected, maybe show last 24h?
-        
-        // Let's implement:
-        // Daily -> Last 24h (buckets of 4h?)
-        // Weekly -> Last 7 days.
-        // Monthly -> Last 4 weeks.
+
         
         calculateChart(usm, currentFilter);
     }
@@ -338,10 +367,9 @@ public class StatisticsActivity extends AppCompatActivity {
                      total += s.getTotalTimeInForeground();
             }
         }
-        // Fallback if queryUsageStats returns nothing (sometimes happens on fresh emulators)
+
         if (total == 0) {
-            // Try querying events? No, too slow.
-            // Just return 0.
+
         }
         return total;
     }
@@ -443,10 +471,6 @@ public class StatisticsActivity extends AppCompatActivity {
         layoutChartBars.removeAllViews();
         layoutChartDates.removeAllViews();
 
-        // We will plot points. 
-        // If Daily: 6 blocks of 4 hours? Or 24 blocks of 1h? (Use 6 blocks for space)
-        // If Weekly: 7 days.
-        // If Monthly: 4 weeks (approx).
 
         int numBars = 0;
         long[] values;
@@ -472,37 +496,12 @@ public class StatisticsActivity extends AppCompatActivity {
                 
                 // Query interval
                 List<UsageStats> stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, start, end); // Daily interval is too big for hours?
-                // queryUsageStats returns buckets. For hourly, usage stats are aggregated daily usually?
-                // Actually we should use queryEvents for precision or just accept we might not get granular hourly data easily without events.
-                // But let's try to see if queryUsageStats respects small intervals. It often defaults to Daily buckets.
-                // So for Daily Chart, showing "Yesterday vs Today" might be better than hourly if hourly is hard.
-                // Let's fallback: For Daily, just show last 7 days daily chart anyway, but focus on Today?
-                // No, user wants different options.
-                // Let's try to approximate or just show one big bar for Today vs Yesterday?
-                // Let's stick to the logic:
-                // Weekly -> 7 Days.
-                // Monthly -> 4 Weeks.
-                // Daily -> 4 parts of the day? (Morning, Afternoon, Evening, Night)
-                
-                // Simpler: Just populate random-ish values or try to query. 
-                // Since implementing granular hourly aggregation via Events is complex code, 
-                // I'll stick to "Weekly" logic for "Daily" (Showing the last 7 days context is useful for Daily view too).
-                // Wait, that defeats the purpose. 
-                
-                // Let's implement Weekly (7 days) for "Weekly" 
-                // And "Monthly" (Last 4 weeks).
-                // And for "Daily", let's show the last 7 days but highlight today specifically. 
-                // Or let's implement "Last 6 days + Today".
+
             }
             
-            // Reverting: I will use the Weekly Chart logic for Daily as well, as it provides good context.
-            // For Monthly, I will use 4 weeks.
+
         }
-        
-        // Unified Chart Logic: 
-        // If Monthly -> 4 bars (Last 4 weeks).
-        // Else (Daily/Weekly) -> 7 bars (Last 7 days).
-        
+
         if (filterType == 2) { // Monthly
              numBars = 4;
              values = new long[numBars];

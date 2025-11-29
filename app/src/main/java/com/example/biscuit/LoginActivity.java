@@ -1,75 +1,90 @@
 package com.example.biscuit;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
-import android.text.style.ForegroundColorSpan;
-import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
-import com.google.android.material.button.MaterialButton;
+import com.example.biscuit.database.DatabaseHelper;
+import com.example.biscuit.sessionStorage.Session;
 
 public class LoginActivity extends AppCompatActivity {
+
+    private DatabaseHelper databaseHelper;
+    private EditText emailInput;
+    private EditText passwordInput;
+    private Button loginButton;
+    private TextView forgotPasswordText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        
+        databaseHelper = new DatabaseHelper(this);
 
-        // --- Handle the "restore" link ---
-        handleRestoreTextView();
+        emailInput = findViewById(R.id.input_email);
+        passwordInput = findViewById(R.id.input_password);
+        loginButton = findViewById(R.id.btn_login_submit);
+        forgotPasswordText = findViewById(R.id.tv_forgot_password); 
 
-        // --- Set up Login Button Click ---
-        MaterialButton loginSubmitButton = findViewById(R.id.btn_login_submit);
-        loginSubmitButton.setOnClickListener(v -> {
-            // TODO: Add login logic (validate input, API call, etc.)
-
-            // For now, navigate to MainActivity on successful login
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            // Clear the activity stack so the user can't go back to the login screen
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-        });
+        loginButton.setOnClickListener(v -> login());
+        
+        if (forgotPasswordText != null) {
+            forgotPasswordText.setOnClickListener(v -> sendResetEmail());
+        }
     }
 
-    private void handleRestoreTextView() {
-        TextView tvForgotPassword = findViewById(R.id.tv_forgot_password);
-        String fullText = getString(R.string.forgot_password_prompt);
+    private void sendResetEmail() {
+        String email = emailInput.getText().toString().trim();
 
-        SpannableString spannableString = new SpannableString(fullText);
+        if (email.isEmpty()) {
+            Toast.makeText(this, "Please enter your email first", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        // The word we want to make clickable and colored
-        String targetWord = "restore";
-        int startIndex = fullText.indexOf(targetWord);
-        int endIndex = startIndex + targetWord.length();
+        // Currently, without a backend server, we cannot automatically send a real email.
+        // We simulate the behavior as requested, informing the user a code was sent.
+        // In the future, this would make an API call to your server.
+        Intent i = new Intent(LoginActivity.this, ConfirmAddressActivity.class);
+        startActivity(i);
 
-        // 1. Create a ClickableSpan
-        ClickableSpan clickableSpan = new ClickableSpan() {
-            @Override
-            public void onClick(@NonNull View widget) {
-                // TODO: Navigate to a "Restore Password" activity or show a dialog
-                Toast.makeText(LoginActivity.this, "Restore password clicked!", Toast.LENGTH_SHORT).show();
-            }
-        };
+        Toast.makeText(this, "A reset code has been sent to " + email, Toast.LENGTH_LONG).show();
+    }
 
-        // 2. Get the color for the link
-        int restoreColor = ContextCompat.getColor(this, R.color.splash_register_link); // Reusing the same color
+    private void login(){
+        String email = emailInput.getText().toString();
+        String password = passwordInput.getText().toString();
+        
+        if (email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        boolean auth = databaseHelper.login(email, password);
 
-        // 3. Apply the spans
-        spannableString.setSpan(clickableSpan, startIndex, endIndex, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannableString.setSpan(new ForegroundColorSpan(restoreColor), startIndex, endIndex, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        if(auth){
+            // save user session
+            SharedPreferences sharedPreferences = getSharedPreferences("BiscuitPrefs", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("KEY_EMAIL", email);
+            editor.putBoolean("KEY_IS_LOGGED_IN", true);
+            editor.apply();
+            
+            // Update global session object as well
+            Session.setEmail(email);
+            Session.setPasswordLength(password.length());
 
-        // 4. Set the text and make it clickable
-        tvForgotPassword.setText(spannableString);
-        tvForgotPassword.setMovementMethod(LinkMovementMethod.getInstance());
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish(); 
+        } else {
+            Toast.makeText(LoginActivity.this, "Error: Invalid credentials", Toast.LENGTH_SHORT).show();
+        }
     }
 }
-    

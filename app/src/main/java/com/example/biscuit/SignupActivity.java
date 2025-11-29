@@ -2,30 +2,88 @@ package com.example.biscuit;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.util.Patterns;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.biscuit.database.DatabaseHelper;
 import com.google.android.material.button.MaterialButton;
 
 public class SignupActivity extends AppCompatActivity {
+
+    private DatabaseHelper databaseHelper;
+    private EditText emailInput;
+    private EditText passwordInput;
+    private MaterialButton registerButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+        
+        // Initialize the DatabaseHelper
+        databaseHelper = new DatabaseHelper(this);
 
-        MaterialButton registerButton = findViewById(R.id.btn_register_submit);
+        emailInput = findViewById(R.id.input_email);
+        passwordInput = findViewById(R.id.input_password);
 
-        registerButton.setOnClickListener(v -> {
-            // TODO: Add registration logic (validate input, create user, API call, etc.)
+        registerButton = findViewById(R.id.btn_register_submit);
 
-            // For now, show a toast and navigate to the MainActivity on success
+        registerButton.setOnClickListener(v -> register());
+    }
+
+    private void register(){
+        String email = emailInput.getText().toString().trim();
+        String password = passwordInput.getText().toString().trim();
+        
+        if(email.isEmpty() || password.isEmpty()) {
+             Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show();
+             return;
+        }
+
+        // Email Validation
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(this, "Invalid email format. Please use: name@domain.com", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Password Validation Logic
+        if (!isPasswordValid(password)) {
+            Toast.makeText(this, "Password must be at least 8 chars, contain 1 Uppercase, 1 Digit, and 1 Special char (@, #, $, etc.)", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        boolean status = databaseHelper.register(email, password);
+        Log.d("activity_register", "email:" + email + " | password: " + password + " | status: " + status);
+
+        if(status){
             Toast.makeText(this, "Registration Successful!", Toast.LENGTH_SHORT).show();
-
-            Intent intent = new Intent(SignupActivity.this, MainActivity.class);
-            // Clear the activity stack so the user can't go back to the signup screen
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            Intent intent = new Intent(SignupActivity.this, LoginActivity.class);
             startActivity(intent);
-        });
+            finish();
+        } else {
+            Toast.makeText(SignupActivity.this, "Error: Registration failed", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private boolean isPasswordValid(String password) {
+        // 1. Minimum 8 characters
+        if (password.length() < 8) return false;
+        
+        // 2. At least one Uppercase letter
+        if (!password.matches(".*[A-Z].*")) return false;
+        
+        // 3. At least one Digit
+        if (!password.matches(".*[0-9].*")) return false;
+        
+        // 4. At least one Special character
+        // We check for any character that is not a letter or digit, or specifically common ones
+        if (!password.matches(".*[*@#$%^&+=!._\\-].*")) return false;
+        
+        return true;
     }
 }

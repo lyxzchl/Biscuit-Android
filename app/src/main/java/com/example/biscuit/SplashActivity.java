@@ -25,21 +25,21 @@ public class SplashActivity extends AppCompatActivity {
 
         // --- Initialize Buttons and Set Listeners ---
         MaterialButton loginButton = findViewById(R.id.btn_login);
-        MaterialButton scheduleButton = findViewById(R.id.btn_schedule);
+        //MaterialButton scheduleButton = findViewById(R.id.btn_schedule);
 
         loginButton.setOnClickListener(v -> {
             // TODO: Replace with your actual LoginActivity
             Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
             startActivity(intent);
-            Toast.makeText(this, "Logged-In", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Logged-In", Toast.LENGTH_SHORT).show();
         });
 
-        scheduleButton.setOnClickListener(v -> {
-            // TODO: Replace with your actual ScheduleActivity or navigate to MainActivity
-            Intent intent = new Intent(SplashActivity.this, MainActivity.class);
-            startActivity(intent);
-            Toast.makeText(this, "Schedule Clicked", Toast.LENGTH_SHORT).show();
-        });
+//        scheduleButton.setOnClickListener(v -> {
+//            // TODO: Replace with your actual ScheduleActivity or navigate to MainActivity
+//            Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+//            startActivity(intent);
+//            //Toast.makeText(this, "Schedule Clicked", Toast.LENGTH_SHORT).show();
+//        });
 
 
         // --- Style and Handle the "Register" TextView ---
