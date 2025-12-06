@@ -10,10 +10,13 @@ import android.util.Log;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "BiscuitDB";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 4; // Incremented to ensure schema update
 
     private static final String USER_TABLE = "_user";
     private static final String ID_COLUMN = "id";
+
+    private static final String FIRST_NAME_COLUMN = "firstname";
+    private static final String LAST_NAME_COLUMN = "lastname";
     private static final String EMAIL_COLUMN = "email";
     private static final String PASSWORD_COLUMN = "password";
     private static final String ENABLED_COLUMN = "enabled";
@@ -33,29 +36,39 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 EMAIL_COLUMN + " TEXT UNIQUE," +
                 PASSWORD_COLUMN + " TEXT," +
                 FIRST_NAME_COLUMN + " TEXT," +
-                LAST_NAME_COLUMN + " TEXT)" );
+                LAST_NAME_COLUMN + " TEXT," +
+                ENABLED_COLUMN + " INTEGER DEFAULT 0)" ); // Added enabled column
+
+        // Create the token table
+        db.execSQL("CREATE TABLE " + TOKEN_TABLE + "(" +
+                ID_COLUMN + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                TOKEN_COLUMN + " TEXT," +
+                EMAIL_COLUMN + " TEXT)" );
 
         // Add a default user for testing
         ContentValues contentValues = new ContentValues();
         contentValues.put(EMAIL_COLUMN, "user");
         contentValues.put(PASSWORD_COLUMN, "password");
+        contentValues.put(ENABLED_COLUMN, 1); // Default user enabled
         db.insert(USER_TABLE, null, contentValues);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + USER_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + TOKEN_TABLE);
         onCreate(db);
     }
 
     // Method to register a new user
-    public boolean register(String email, String password){
+    public boolean register(String email, String password, String firstName, String lastName){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(EMAIL_COLUMN, email);
         contentValues.put(PASSWORD_COLUMN, password);
         contentValues.put(FIRST_NAME_COLUMN, firstName);
         contentValues.put(LAST_NAME_COLUMN, lastName);
+        contentValues.put(ENABLED_COLUMN, 0); // Not enabled by default
 
         long result = db.insert(USER_TABLE, null, contentValues);
         Log.d("DB", "Insert result = " + result);
@@ -65,9 +78,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Method to check login credentials
     public boolean login(String email, String password){
         SQLiteDatabase db = this.getReadableDatabase();
-        //rawQuery returns data, execSQL does not.
-        // a cursor is a pointer that allows you to read rows returned from a SQL query. (a Row type)
-
         Cursor cursor = db.rawQuery("SELECT * FROM " + USER_TABLE + " WHERE " +
                         EMAIL_COLUMN + "=? AND " + PASSWORD_COLUMN + "=?",
                 new String[]{email, password});
@@ -138,6 +148,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return result > 0;  // if at least 1 row updated → true
     }
 
+    public boolean updatePassword(String email, String newPassword) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(PASSWORD_COLUMN, newPassword);
+        int result = db.update(USER_TABLE, cv, EMAIL_COLUMN + " = ?", new String[]{email});
+        return result > 0;
+    }
+
     public boolean saveCode(String code, String email){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -145,7 +163,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(EMAIL_COLUMN, email);
 
         long result = db.insert(TOKEN_TABLE, null, contentValues);
-        Log.d("DB", "Insert token = " +code + "result = " + result);
+        Log.d("DB", "Insert token = " +code + " result = " + result);
         return result != -1;
     }
 
@@ -163,10 +181,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public boolean validateEmail(String email){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
-        cv.put("enabled", true);
+        cv.put(ENABLED_COLUMN, 1);
         int result = db.update(USER_TABLE, cv, EMAIL_COLUMN + " = ?", new String[]{email});
         return result > 0;
     }
-
 }
-

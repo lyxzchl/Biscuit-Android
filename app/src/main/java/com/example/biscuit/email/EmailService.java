@@ -40,21 +40,25 @@ public class EmailService {
             json.put("subject","Email validation");
 
         } catch (JSONException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
 
-        Request request = new Request.Builder()
-                .url("//permanent-alena-whatdoesnotexist-ba58c9ae.koyeb.app/api/email/send")
-                .post(RequestBody.create(
-                        String.valueOf(json),
-                        MediaType.parse("application/json")
-                ))
-                .build();
+        try {
+            Request request = new Request.Builder()
+                    .url("https://permanent-alena-whatdoesnotexist-ba58c9ae.koyeb.app/api/email/send")
+                    .post(RequestBody.create(
+                            String.valueOf(json),
+                            MediaType.parse("application/json")
+                    ))
+                    .build();
 
-        client.newCall(request).enqueue(new Callback() {
-            @Override public void onFailure(Call call, IOException e) { }
-            @Override public void onResponse(Call call, Response response) { }
-        });
+            client.newCall(request).enqueue(new Callback() {
+                @Override public void onFailure(Call call, IOException e) { e.printStackTrace(); }
+                @Override public void onResponse(Call call, Response response) { response.close(); }
+            });
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
 
         databaseHelper.saveCode(validationCode, email);
     }

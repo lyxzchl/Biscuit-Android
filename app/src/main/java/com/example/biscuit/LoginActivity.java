@@ -11,11 +11,13 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.biscuit.database.DatabaseHelper;
+import com.example.biscuit.email.EmailService;
 import com.example.biscuit.sessionStorage.Session;
 
 public class LoginActivity extends AppCompatActivity {
 
     private DatabaseHelper databaseHelper;
+    private EmailService emailService;
     private EditText emailInput;
     private EditText passwordInput;
     private Button loginButton;
@@ -27,6 +29,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         
         databaseHelper = new DatabaseHelper(this);
+        emailService = new EmailService(this);
 
         emailInput = findViewById(R.id.input_email);
         passwordInput = findViewById(R.id.input_password);
@@ -47,19 +50,27 @@ public class LoginActivity extends AppCompatActivity {
             Toast.makeText(this, "Please enter your email first", Toast.LENGTH_SHORT).show();
             return;
         }
+        
+        // Check if user exists first (optional, but good UX)
+        // We can assume if email format is valid, we send code.
+        // Or checking database:
+        // if (!databaseHelper.checkEmailExists(email)) ... 
+        
+        // Generate and Send Code
+        String code = emailService.generateValidationCode();
+        emailService.sendEmail(email, code);
 
-        // Currently, without a backend server, we cannot automatically send a real email.
-        // We simulate the behavior as requested, informing the user a code was sent.
-        // In the future, this would make an API call to your server.
-        Intent i = new Intent(LoginActivity.this, ConfirmAddressActivity.class);
+        // Navigate to Reset Password Screen
+        Intent i = new Intent(LoginActivity.this, ResetPasswordActivity.class);
+        i.putExtra("email", email);
         startActivity(i);
 
         Toast.makeText(this, "A reset code has been sent to " + email, Toast.LENGTH_LONG).show();
     }
 
     private void login(){
-        String email = emailInput.getText().toString();
-        String password = passwordInput.getText().toString();
+        String email = emailInput.getText().toString().trim();
+        String password = passwordInput.getText().toString().trim();
         
         if (email.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show();
