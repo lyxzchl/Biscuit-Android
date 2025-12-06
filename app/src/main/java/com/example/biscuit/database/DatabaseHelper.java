@@ -34,13 +34,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 PASSWORD_COLUMN + " TEXT," +
                 FIRST_NAME_COLUMN + " TEXT," +
                 LAST_NAME_COLUMN + " TEXT)" );
-        
+
         // Add a default user for testing
         ContentValues contentValues = new ContentValues();
         contentValues.put(EMAIL_COLUMN, "user");
         contentValues.put(PASSWORD_COLUMN, "password");
-        contentValues.put(FIRST_NAME_COLUMN, "Test");
-        contentValues.put(LAST_NAME_COLUMN, "User");
         db.insert(USER_TABLE, null, contentValues);
     }
 
@@ -62,11 +60,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         long result = db.insert(USER_TABLE, null, contentValues);
         Log.d("DB", "Insert result = " + result);
         return result != -1;
-    }
-
-    // Backward compatibility register (assigns empty names)
-    public boolean register(String email, String password){
-        return register(email, password, "", "");
     }
 
     // Method to check login credentials
