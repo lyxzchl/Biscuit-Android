@@ -9,14 +9,16 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "BiscuitDB";
-    private static final int DATABASE_VERSION = 2; // Increment version for schema update
+    private static final int DATABASE_VERSION = 2;
 
     private static final String USER_TABLE = "_user";
     private static final String ID_COLUMN = "id";
     private static final String EMAIL_COLUMN = "email";
     private static final String PASSWORD_COLUMN = "password";
-    private static final String FIRST_NAME_COLUMN = "first_name";
-    private static final String LAST_NAME_COLUMN = "last_name";
+    private static final String ENABLED_COLUMN = "enabled";
+
+    private static final String TOKEN_TABLE = "token";
+    private static final String TOKEN_COLUMN = "token";
 
     public DatabaseHelper(Context context){
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -24,10 +26,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        // Create the user table with new columns
-        db.execSQL("CREATE TABLE " + USER_TABLE + "(" + 
-                ID_COLUMN + " INTEGER PRIMARY KEY AUTOINCREMENT," + 
-                EMAIL_COLUMN + " TEXT UNIQUE," + 
+        // Create the user table
+        db.execSQL("CREATE TABLE " + USER_TABLE + "(" +
+                ID_COLUMN + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                EMAIL_COLUMN + " TEXT UNIQUE," +
                 PASSWORD_COLUMN + " TEXT," +
                 FIRST_NAME_COLUMN + " TEXT," +
                 LAST_NAME_COLUMN + " TEXT)" );
@@ -57,6 +59,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(LAST_NAME_COLUMN, lastName);
 
         long result = db.insert(USER_TABLE, null, contentValues);
+        Log.d("DB", "Insert result = " + result);
         return result != -1;
     }
 
@@ -68,6 +71,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Method to check login credentials
     public boolean login(String email, String password){
         SQLiteDatabase db = this.getReadableDatabase();
+        //rawQuery returns data, execSQL does not.
+        // a cursor is a pointer that allows you to read rows returned from a SQL query. (a Row type)
+
         Cursor cursor = db.rawQuery("SELECT * FROM " + USER_TABLE + " WHERE " +
                         EMAIL_COLUMN + "=? AND " + PASSWORD_COLUMN + "=?",
                 new String[]{email, password});
@@ -81,14 +87,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public String getUserName(String email) {
         SQLiteDatabase db = this.getReadableDatabase();
         String fullName = "User"; // Default
-        
-        Cursor cursor = db.rawQuery("SELECT " + FIRST_NAME_COLUMN + ", " + LAST_NAME_COLUMN + 
+
+        Cursor cursor = db.rawQuery("SELECT " + FIRST_NAME_COLUMN + ", " + LAST_NAME_COLUMN +
                 " FROM " + USER_TABLE + " WHERE " + EMAIL_COLUMN + "=?", new String[]{email});
-        
+
         if (cursor != null && cursor.moveToFirst()) {
             String first = cursor.getString(0);
             String last = cursor.getString(1);
-            
+
             if (first != null && !first.isEmpty()) {
                 fullName = first;
                 if (last != null && !last.isEmpty()) {
@@ -137,4 +143,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return result > 0;  // if at least 1 row updated → true
     }
-}
+
+    public boolean saveCode(String code, String email){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(TOKEN_COLUMN, code);
+        contentValues.put(EMAIL_COLUMN, email);
+
+        long result = db.insert(TOKEN_TABLE, null, contentValues);
+        Log.d("DB", "Insert token = " +code + "result = " + result);
+        return result != -1;
+    }
+
+    public boolean isTokenValid(String code, String email){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TOKEN_TABLE + " WHERE " +
+                        TOKEN_COLUMN + "=? AND " + EMAIL_COLUMN + "=?",
+                new String[]{code, email});
+        boolean result = cursor.getCount() > 0;
+        cursor.close();
+
+        return result;
+    }

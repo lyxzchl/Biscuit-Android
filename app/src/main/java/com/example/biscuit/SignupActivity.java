@@ -11,7 +11,23 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.biscuit.database.DatabaseHelper;
+import com.example.biscuit.email.EmailService;
+import com.example.biscuit.sessionStorage.Session;
 import com.google.android.material.button.MaterialButton;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.security.SecureRandom;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class SignupActivity extends AppCompatActivity {
 
@@ -22,6 +38,8 @@ public class SignupActivity extends AppCompatActivity {
     private EditText firstNameInput;
     private EditText lastNameInput;
     private MaterialButton registerButton;
+
+    private EmailService emailService = new EmailService(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,8 +96,13 @@ public class SignupActivity extends AppCompatActivity {
         Log.d("activity_register", "email:" + email + " | status: " + status);
 
         if(status){
+            // send validation email
+            String validationCode = emailService.generateValidationCode();
+            emailService.sendEmail(email, validationCode);
+            Session.setEmail(email);
+            Session.setPasswordLength(password.length());
             Toast.makeText(this, "Registration Successful!", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(SignupActivity.this, LoginActivity.class);
+            Intent intent = new Intent(SignupActivity.this, ConfirmAddressActivity.class);
             startActivity(intent);
             finish();
         } else {
