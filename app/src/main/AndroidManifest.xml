@@ -55,6 +55,14 @@
         <activity
              android:name=".BlockSettingsActivity"
              android:exported="false"/>
+        
+        <!-- Newly added activities -->
+        <activity
+             android:name=".EditProfileActivity"
+             android:exported="false"/>
+        <activity
+             android:name=".ResetPasswordActivity"
+             android:exported="false"/>
 
         <service android:name=".AppBlockService" 
                  android:enabled="true"

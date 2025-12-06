@@ -10,7 +10,7 @@ import android.util.Log;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "BiscuitDB";
-    private static final int DATABASE_VERSION = 4; // Incremented to ensure schema update
+    private static final int DATABASE_VERSION = 5; // Incremented to ensure schema update
 
     private static final String USER_TABLE = "_user";
     private static final String ID_COLUMN = "id";
