@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -50,7 +51,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // Method to register a new user
-    public boolean register(String email, String password, String firstName, String lastName){
+    public boolean register(String email, String password){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(EMAIL_COLUMN, email);
@@ -165,3 +166,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return result;
     }
+
+    public boolean validateEmail(String email){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put("enabled", true);
+        int result = db.update(USER_TABLE, cv, EMAIL_COLUMN + " = ?", new String[]{email});
+        return result > 0;
+    }
+
+}
+
