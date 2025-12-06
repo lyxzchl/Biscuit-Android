@@ -18,6 +18,9 @@ public class SignupActivity extends AppCompatActivity {
     private DatabaseHelper databaseHelper;
     private EditText emailInput;
     private EditText passwordInput;
+    private EditText confirmPasswordInput;
+    private EditText firstNameInput;
+    private EditText lastNameInput;
     private MaterialButton registerButton;
 
     @Override
@@ -28,8 +31,11 @@ public class SignupActivity extends AppCompatActivity {
         // Initialize the DatabaseHelper
         databaseHelper = new DatabaseHelper(this);
 
+        firstNameInput = findViewById(R.id.input_firstname);
+        lastNameInput = findViewById(R.id.input_lastname);
         emailInput = findViewById(R.id.input_email);
         passwordInput = findViewById(R.id.input_password);
+        confirmPasswordInput = findViewById(R.id.input_confirm_password);
 
         registerButton = findViewById(R.id.btn_register_submit);
 
@@ -37,12 +43,22 @@ public class SignupActivity extends AppCompatActivity {
     }
 
     private void register(){
+        String firstName = firstNameInput.getText().toString().trim();
+        String lastName = lastNameInput.getText().toString().trim();
         String email = emailInput.getText().toString().trim();
         String password = passwordInput.getText().toString().trim();
+        String confirmPassword = confirmPasswordInput.getText().toString().trim();
         
-        if(email.isEmpty() || password.isEmpty()) {
-             Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show();
+        // Validate all fields are present
+        if(firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
              return;
+        }
+
+        // Validate Passwords Match
+        if (!password.equals(confirmPassword)) {
+            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+            return;
         }
 
         // Email Validation
@@ -57,8 +73,9 @@ public class SignupActivity extends AppCompatActivity {
             return;
         }
 
-        boolean status = databaseHelper.register(email, password);
-        Log.d("activity_register", "email:" + email + " | password: " + password + " | status: " + status);
+        // Pass first and last name to register
+        boolean status = databaseHelper.register(email, password, firstName, lastName);
+        Log.d("activity_register", "email:" + email + " | status: " + status);
 
         if(status){
             Toast.makeText(this, "Registration Successful!", Toast.LENGTH_SHORT).show();
@@ -66,7 +83,7 @@ public class SignupActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         } else {
-            Toast.makeText(SignupActivity.this, "Error: Registration failed", Toast.LENGTH_SHORT).show();
+            Toast.makeText(SignupActivity.this, "Error: Registration failed (Email might already exist)", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -81,7 +98,6 @@ public class SignupActivity extends AppCompatActivity {
         if (!password.matches(".*[0-9].*")) return false;
         
         // 4. At least one Special character
-        // We check for any character that is not a letter or digit, or specifically common ones
         if (!password.matches(".*[*@#$%^&+=!._\\-].*")) return false;
         
         return true;

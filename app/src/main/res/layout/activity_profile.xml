@@ -55,9 +55,9 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintVertical_bias="0.2" />
+        app:layout_constraintVertical_bias="0.15" />
 
-    <!-- Profile Name -->
+    <!-- Profile Name Display (Hidden when editing) -->
     <TextView
         android:id="@+id/tvProfileName"
         android:layout_width="wrap_content"
@@ -71,6 +71,44 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp" />
 
+    <!-- Edit Name Container (Visible when editing) -->
+    <LinearLayout
+        android:id="@+id/layoutEditName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:visibility="gone"
+        android:paddingStart="40dp"
+        android:paddingEnd="40dp"
+        app:layout_constraintTop_toBottomOf="@id/imgProfile"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp">
+
+        <EditText
+            android:id="@+id/inputFirstName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="First Name"
+            android:inputType="textPersonName"
+            android:background="@drawable/edit_text_bg"
+            android:padding="10dp"
+            android:layout_marginEnd="8dp"/>
+
+        <EditText
+            android:id="@+id/inputLastName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Last Name"
+            android:inputType="textPersonName"
+            android:background="@drawable/edit_text_bg"
+            android:padding="10dp"/>
+    </LinearLayout>
+
+
     <!-- Email Field -->
     <TextView
         android:id="@+id/labelEmail"
@@ -80,7 +118,7 @@
         android:textSize="14sp"
         app:layout_constraintStart_toStartOf="@id/inputEmail"
         app:layout_constraintTop_toBottomOf="@id/tvProfileName"
-        android:layout_marginTop="32dp" />
+        android:layout_marginTop="24dp" />
 
     <EditText
         android:id="@+id/inputEmail"

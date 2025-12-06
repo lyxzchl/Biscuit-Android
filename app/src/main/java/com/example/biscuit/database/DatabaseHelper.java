@@ -9,12 +9,14 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "BiscuitDB";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2; // Increment version for schema update
 
     private static final String USER_TABLE = "_user";
     private static final String ID_COLUMN = "id";
     private static final String EMAIL_COLUMN = "email";
     private static final String PASSWORD_COLUMN = "password";
+    private static final String FIRST_NAME_COLUMN = "first_name";
+    private static final String LAST_NAME_COLUMN = "last_name";
 
     public DatabaseHelper(Context context){
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -22,16 +24,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        // Create the user table
+        // Create the user table with new columns
         db.execSQL("CREATE TABLE " + USER_TABLE + "(" + 
                 ID_COLUMN + " INTEGER PRIMARY KEY AUTOINCREMENT," + 
                 EMAIL_COLUMN + " TEXT UNIQUE," + 
-                PASSWORD_COLUMN + " TEXT)" );
+                PASSWORD_COLUMN + " TEXT," +
+                FIRST_NAME_COLUMN + " TEXT," +
+                LAST_NAME_COLUMN + " TEXT)" );
         
         // Add a default user for testing
         ContentValues contentValues = new ContentValues();
         contentValues.put(EMAIL_COLUMN, "user");
         contentValues.put(PASSWORD_COLUMN, "password");
+        contentValues.put(FIRST_NAME_COLUMN, "Test");
+        contentValues.put(LAST_NAME_COLUMN, "User");
         db.insert(USER_TABLE, null, contentValues);
     }
 
@@ -42,14 +48,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // Method to register a new user
-    public boolean register(String email, String password){
+    public boolean register(String email, String password, String firstName, String lastName){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(EMAIL_COLUMN, email);
         contentValues.put(PASSWORD_COLUMN, password);
+        contentValues.put(FIRST_NAME_COLUMN, firstName);
+        contentValues.put(LAST_NAME_COLUMN, lastName);
 
         long result = db.insert(USER_TABLE, null, contentValues);
         return result != -1;
+    }
+
+    // Backward compatibility register (assigns empty names)
+    public boolean register(String email, String password){
+        return register(email, password, "", "");
     }
 
     // Method to check login credentials
@@ -62,5 +75,66 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
 
         return result;
+    }
+
+    // Method to get user's full name
+    public String getUserName(String email) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String fullName = "User"; // Default
+        
+        Cursor cursor = db.rawQuery("SELECT " + FIRST_NAME_COLUMN + ", " + LAST_NAME_COLUMN + 
+                " FROM " + USER_TABLE + " WHERE " + EMAIL_COLUMN + "=?", new String[]{email});
+        
+        if (cursor != null && cursor.moveToFirst()) {
+            String first = cursor.getString(0);
+            String last = cursor.getString(1);
+            
+            if (first != null && !first.isEmpty()) {
+                fullName = first;
+                if (last != null && !last.isEmpty()) {
+                    fullName += " " + last;
+                }
+            }
+            cursor.close();
+        }
+        return fullName;
+    }
+
+    // Method to get user's first name
+    public String getFirstName(String email) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String firstName = "";
+        Cursor cursor = db.rawQuery("SELECT " + FIRST_NAME_COLUMN + " FROM " + USER_TABLE + " WHERE " + EMAIL_COLUMN + "=?", new String[]{email});
+        if (cursor != null && cursor.moveToFirst()) {
+            firstName = cursor.getString(0);
+            cursor.close();
+        }
+        return firstName;
+    }
+
+    // Method to get user's last name
+    public String getLastName(String email) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String lastName = "";
+        Cursor cursor = db.rawQuery("SELECT " + LAST_NAME_COLUMN + " FROM " + USER_TABLE + " WHERE " + EMAIL_COLUMN + "=?", new String[]{email});
+        if (cursor != null && cursor.moveToFirst()) {
+            lastName = cursor.getString(0);
+            cursor.close();
+        }
+        return lastName;
+    }
+
+    public boolean update(String oldEmail, String newEmail, String newPassword, String newFirstName, String newLastName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+
+        cv.put(EMAIL_COLUMN, newEmail);
+        cv.put(PASSWORD_COLUMN, newPassword);
+        cv.put(FIRST_NAME_COLUMN, newFirstName);
+        cv.put(LAST_NAME_COLUMN, newLastName);
+
+        int result = db.update(USER_TABLE, cv, EMAIL_COLUMN + " = ?", new String[]{oldEmail});
+
+        return result > 0;  // if at least 1 row updated → true
     }
 }
