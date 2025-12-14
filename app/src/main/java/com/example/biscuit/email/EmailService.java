@@ -45,7 +45,7 @@ public class EmailService {
 
         try {
             Request request = new Request.Builder()
-                    .url("https://permanent-alena-whatdoesnotexist-ba58c9ae.koyeb.app/api/email/send")
+                    .url("https://unemployed-kass-bicuit-5acd1cc4.koyeb.app/api/email/send")
                     .post(RequestBody.create(
                             String.valueOf(json),
                             MediaType.parse("application/json")
